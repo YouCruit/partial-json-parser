@@ -1,5 +1,8 @@
-package com.lanefinder.parser
+package com.lanefinder.parser.api
 
+import com.lanefinder.parser.PartialJsonGrammarLexer
+import com.lanefinder.parser.PartialJsonGrammarParser
+import com.lanefinder.parser.buildJson
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
@@ -22,4 +25,3 @@ class PartialJsonParser {
     }
 }
 
-class ParseResult(val root: JsonValue?)

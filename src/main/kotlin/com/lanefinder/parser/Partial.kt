@@ -1,9 +1,5 @@
 package com.lanefinder.parser
 
-fun ParseResult.isPartial(path: String): Boolean {
-    return root?.isPartial(path) ?: true
-}
-
 class FastIllegalArgumentException(message: String) : IllegalArgumentException(message) {
     // Fill in stack trace takes time
     // This might be thrown in a tight loop where we dont need the penalty
@@ -44,7 +40,7 @@ fun JsonLiteral.isPartial(path: String): Boolean {
     return partial
 }
 
-private fun JsonValue.isPartial(path: String): Boolean {
+fun JsonValue.isPartial(path: String): Boolean {
     return when (this) {
         is JsonObject -> isPartial(path)
         is JsonArray -> isPartial(path)

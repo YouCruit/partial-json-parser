@@ -1,6 +1,6 @@
 package com.lanefinder.parser
 
-private fun JsonValue.valueAt(path: String): Any? {
+fun JsonValue.valueAt(path: String): Any? {
     return when(this) {
         is JsonObject -> valueAt(path)
         is JsonArray -> valueAt(path)
@@ -60,8 +60,4 @@ private fun JsonLiteral.valueAt(path: String): Any? {
         }
         else -> value
     }
-}
-
-fun ParseResult.valueAt(path: String): Any? {
-    return root?.valueAt(path)
 }
