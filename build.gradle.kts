@@ -15,6 +15,34 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+tasks.register("prepareRelease") {
+    doLast {
+        val currentVersion = project.version.toString()
+        val newVersion = currentVersion.replace(Regex("(\\d+\\.\\d+\\.)(\\d+)")) { matchResult ->
+            val majorMinor = matchResult.groupValues[1]
+            val patch = matchResult.groupValues[2].toInt() + 1
+            "$majorMinor$patch"
+        }
+        project.version = newVersion
+
+        val filesToCommit = listOf("build.gradle.kts")
+        exec {
+            commandLine("git", "add", *filesToCommit.toTypedArray())
+        }
+        exec {
+            commandLine("git", "commit", "-m", "Release version $newVersion")
+        }
+        exec {
+            commandLine("git", "tag", "v$newVersion")
+        }
+        exec {
+            commandLine("git", "push")
+        }
+        exec {
+            commandLine("git", "push", "--tags")
+        }
+    }
+}
 kotlin {
     jvmToolchain(17)
 }
