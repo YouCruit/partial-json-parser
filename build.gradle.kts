@@ -57,7 +57,8 @@ tasks.test {
 }
 
 tasks.generateGrammarSource {
-    outputDirectory = file("${project.buildDir}/generated/sources/main/kotlin/antlr")
+    val buildDir = layout.buildDirectory.get().asFile
+    outputDirectory = File(buildDir,"generated/sources/main/kotlin/antlr")
     arguments = listOf("-package", "com.lanefinder.parser")
 }
 
