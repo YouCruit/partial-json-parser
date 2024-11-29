@@ -114,6 +114,10 @@ java {
     withSourcesJar()
 }
 
+tasks.javadoc {
+    enabled = false
+}
+
 tasks.test {
     useJUnitPlatform()
 }
