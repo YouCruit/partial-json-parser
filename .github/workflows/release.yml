@@ -47,4 +47,5 @@ jobs:
           GPG_KEY: ${{ secrets.GPG_KEY }}
         run: |
           echo "${{ secrets.GPG_KEY }}" | gpg --import --batch
+          gpg --list-secret-keys
           ./gradlew publishToSonatype --stacktrace
