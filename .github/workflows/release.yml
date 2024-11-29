@@ -1,4 +1,4 @@
-name: Build, Test and Release
+name: Build and Publish
 
 on:
   push:
@@ -46,5 +46,6 @@ jobs:
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
           GPG_KEY: ${{ secrets.GPG_KEY }}
         run: |
+          gpg-agent --daemon
           echo "${{ secrets.GPG_KEY }}" | gpg --import --batch
-          ./gradlew publishToSonatype
+          ./gradlew publishToSonatype --stacktrace
