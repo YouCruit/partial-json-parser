@@ -1,12 +1,14 @@
+import net.researchgate.release.GitAdapter
+
 plugins {
     `maven-publish`
     signing
     kotlin("jvm") version "2.0.20"
+    id("net.researchgate.release") version "3.0.2"
     antlr
 }
 
 group = "com.lanefinder"
-version = "1.0.1"
 
 publishing {
     publications {
@@ -100,32 +102,26 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-tasks.register("prepareRelease") {
-    doLast {
-        val currentVersion = project.version.toString()
-        val newVersion = currentVersion.replace(Regex("(\\d+\\.\\d+\\.)(\\d+)")) { matchResult ->
-            val majorMinor = matchResult.groupValues[1]
-            val patch = matchResult.groupValues[2].toInt() + 1
-            "$majorMinor$patch"
-        }
-        project.version = newVersion
+release {
+    failOnCommitNeeded = true
+    failOnPublishNeeded = true
+    failOnSnapshotDependencies = true
+    failOnUnversionedFiles = true
+    failOnUpdateNeeded = true
+    revertOnFail = true
+    preTagCommitMessage = "Gradle Release Plugin] - pre tag commit: "
+    tagCommitMessage = "[Gradle Release Plugin] - creating tag: "
+    newVersionCommitMessage = "[Gradle Release Plugin] - new version commit: "
+    tagTemplate = "v${'$'}{version}"
+    versionPropertyFile = "gradle.properties"
+    snapshotSuffix = "-SNAPSHOT"
 
-        val filesToCommit = listOf("build.gradle.kts")
-        exec {
-            commandLine("git", "add", *filesToCommit.toTypedArray())
-        }
-        exec {
-            commandLine("git", "commit", "-m", "Release version $newVersion")
-        }
-        exec {
-            commandLine("git", "tag", "v$newVersion")
-        }
-        exec {
-            commandLine("git", "push")
-        }
-        exec {
-            commandLine("git", "push", "--tags")
-        }
+    scmAdapters = listOf(GitAdapter::class.java)
+
+    git {
+        requireBranch = "master"
+        pushToRemote ="origin"
+        commitVersionFileOnly = true
     }
 }
 
