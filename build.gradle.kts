@@ -70,7 +70,6 @@ signing {
         project.providers.environmentVariable("GPG_KEY").orNull,
         project.providers.environmentVariable("GPG_PASSPHRASE").orNull,
     )
-    useGpgCmd()
     sign(tasks["jar"])
 }
 
