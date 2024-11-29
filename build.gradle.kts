@@ -1,60 +1,65 @@
 import net.researchgate.release.GitAdapter
 
 plugins {
-    `maven-publish`
     signing
     kotlin("jvm") version "2.0.20"
     id("net.researchgate.release") version "3.0.2"
+    id("eu.kakde.gradle.sonatype-maven-central-publisher") version "1.0.6"
     antlr
 }
 
 group = "com.lanefinder"
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
+sonatypeCentralPublishExtension {
+    val group = "com.lanefinder"
+    val artifactName = "partial-json-parser"
+    val publishingType = "AUTOMATIC"
+    val desc = "A library to parse partial JSON data."
+    val license = "The MIT License"
+    val licenseUrl = "https://opensource.org/licenses/MIT"
+    val githubRepo = "YouCruit/partial-json-parser"
+    val developerId = "pgilmore"
+    val developerName = "Patrick Gilmore"
+    val developerOrganization = "lanefinder.com"
+    val developerOrganizationUrl = "https://www.lanefinder.com"
 
-            groupId = "com.lanefinder"
-            artifactId = "partial-json-parser"
-            version = project.version.toString()
+    groupId.set(group)
+    artifactId.set(artifactName)
+    version.set(project.version.toString())
+    componentType.set("java") // "java" or "versionCatalog"
+    this.publishingType.set(publishingType) // USER_MANAGED or AUTOMATIC
 
-            pom {
-                name.set("Partial JSON Parser")
-                description.set("A library to parse partial JSON data.")
-                url.set("https://github.com/YouCruit/partial-json-parser")
+    // Set username and password for Sonatype repository
+    username.set(project.providers.environmentVariable("OSSRH_USERNAME"))
+    password.set(project.providers.environmentVariable("OSSRH_PASSWORD"))
 
-                licenses {
-                    license {
-                        name.set("The MIT License")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("pgilmore")
-                        name.set("Patrick Gilmore")
-                        email.set("patrick.gilmore@lanefinder.com")
-                        organization.set("Lanefinder")
-                        organizationUrl.set("https://www.lanefinder.com/")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/YouCruit/partial-json-parser.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:YouCruit/partial-json-parser.git")
-                    url.set("https://github.com/YouCruit/partial-json-parser")
-                }
+    // Configure POM metadata
+    pom {
+        name.set(artifactName)
+        description.set(desc)
+        url.set("https://github.com/${githubRepo}")
+        licenses {
+            license {
+                name.set(license)
+                url.set(licenseUrl)
             }
         }
-    }
-    repositories {
-        maven {
-            name = "ossrh"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = project.providers.environmentVariable("OSSRH_USERNAME").orNull
-                password = project.providers.environmentVariable("OSSRH_PASSWORD").orNull
+        developers {
+            developer {
+                id.set(developerId)
+                name.set(developerName)
+                organization.set(developerOrganization)
+                organizationUrl.set(developerOrganizationUrl)
             }
+        }
+        scm {
+            url.set("https://github.com/${githubRepo}")
+            connection.set("scm:git:https://github.com/${githubRepo}")
+            developerConnection.set("scm:git:https://github.com/${githubRepo}")
+        }
+        issueManagement {
+            system.set("GitHub")
+            url.set("https://github.com/${githubRepo}/issues")
         }
     }
 }
@@ -63,34 +68,10 @@ signing {
     useInMemoryPgpKeys(
         project.providers.environmentVariable("GPG_KEY_ID").orNull,
         project.providers.environmentVariable("GPG_KEY").orNull,
-        project.providers.environmentVariable("GPG_PASSPHRASE").orNull
+        "",
     )
-    sign(publishing.publications["mavenJava"])
-}
-
-// Add checks during task execution
-tasks.withType<PublishToMavenRepository>().configureEach {
-    doFirst {
-        // Fail the build if the version contains "SNAPSHOT"
-        if (project.version.toString().contains("SNAPSHOT", ignoreCase = true)) {
-            throw GradleException("Publishing snapshots is not allowed. Current version: ${project.version}")
-        }
-
-        // Check for required environment variables
-        val ossrhUsername = System.getenv("OSSRH_USERNAME")
-        val ossrhPassword = System.getenv("OSSRH_PASSWORD")
-        if (ossrhUsername.isNullOrEmpty() || ossrhPassword.isNullOrEmpty()) {
-            throw GradleException("OSSRH_USERNAME and OSSRH_PASSWORD must be set to publish to OSSRH")
-        }
-
-        // Ensure GPG keys are set for signing
-        val signingKeyId = System.getenv("GPG_KEY_ID")
-        val signingPassword = System.getenv("GPG_PASSPHRASE")
-        val signingKey = System.getenv("GPG_KEY")
-        if (signingKeyId.isNullOrEmpty() || signingPassword.isNullOrEmpty() || signingKey.isNullOrEmpty()) {
-            throw GradleException("GPG_KEY_ID, GPG_KEY, and GPG_PASSPHRASE must be set for signing")
-        }
-    }
+    useGpgCmd()
+    sign(tasks["jar"])
 }
 
 repositories {
@@ -120,7 +101,7 @@ release {
 
     git {
         requireBranch = "master"
-        pushToRemote ="origin"
+        pushToRemote = "origin"
         commitVersionFileOnly = true
     }
 }
