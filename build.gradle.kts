@@ -75,10 +75,11 @@ signing {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    antlr("org.antlr:antlr4:4.10")
+    antlr("org.antlr:antlr4:4.9.2")
     testImplementation(kotlin("test"))
 }
 
@@ -106,11 +107,7 @@ release {
 }
 
 kotlin {
-    jvmToolchain(17)
-}
-
-java {
-    withSourcesJar()
+    jvmToolchain(21)
 }
 
 tasks.javadoc {
