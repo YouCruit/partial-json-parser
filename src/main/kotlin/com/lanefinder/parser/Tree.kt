@@ -118,9 +118,11 @@ fun ValueContext.buildTree(): JsonValue {
         is PartialObjectContext -> buildTree()
         is ArrayContext -> buildTree()
         is PartialArrayContext -> buildTree()
-        else -> throw RuntimeException("Unknown context $this")
+        else -> throw UnknownValueContextException("Unknown context $this")
     }
 }
+
+class UnknownValueContextException(message: String): RuntimeException(message)
 
 sealed interface JsonValue
 
